@@ -40,16 +40,22 @@ public class MapEngine {
 
   /** This method is invoked when the user runs the command info-country. */
   public void showInfoCountry() {
-    MessageCli.INSERT_COUNTRY.printMessage();
-    String country = Utils.scanner.nextLine();
-    List<String> countryDetails = countryDetailsMap.get(country);
-    if (countryDetails == null) {
-      MessageCli.INVALID_COUNTRY.printMessage(country);
-    } else {
-      // Assuming countryDetails has the format: [countryName, capital, population, ...]
-      String capital = countryDetails.get(1);
-      String population = countryDetails.get(2);
-      MessageCli.COUNTRY_INFO.printMessage(country, capital, population);
+    boolean validCountry = false;
+
+    while (!validCountry) {
+      MessageCli.INSERT_COUNTRY.printMessage();
+      String country =Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
+
+      List<String> countryDetails = countryDetailsMap.get(country);
+      if (countryDetails == null) {
+        MessageCli.INVALID_COUNTRY.printMessage(country);
+      } else {
+        // Assuming countryDetails has the format: [countryName, capital, population, ...]
+        String continent = countryDetails.get(1);
+        String tax = countryDetails.get(2);
+        MessageCli.COUNTRY_INFO.printMessage(country, continent, tax);
+        validCountry = true; // Exit the loop
+      }
     }
   }
 
