@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /** This class is the main entry point. */
 public class MapEngine {
 
   private Map<String, List<String>> countryDetailsMap;
   private Map<String, List<String>> adjacencyMap;
+  private String country;
 
   public MapEngine() {
     countryDetailsMap = new HashMap<>();
@@ -41,22 +43,28 @@ public class MapEngine {
   /** This method is invoked when the user runs the command info-country. */
   public void showInfoCountry() {
     boolean validCountry = false;
-
+    MessageCli.INSERT_COUNTRY.printMessage();
+    
     while (!validCountry) {
-      MessageCli.INSERT_COUNTRY.printMessage();
-      String country =Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
-
-      List<String> countryDetails = countryDetailsMap.get(country);
-      if (countryDetails == null) {
+      String country = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
+      try {
+        isCountryValid(country);
+        List<String> countryDetails = countryDetailsMap.get(country);
+        MessageCli.COUNTRY_INFO.printMessage(country, countryDetails.get(1), countryDetails.get(2));
+        validCountry = true;
+      } catch (InvalidCountry e) {
         MessageCli.INVALID_COUNTRY.printMessage(country);
-      } else {
-        // Assuming countryDetails has the format: [countryName, capital, population, ...]
-        String continent = countryDetails.get(1);
-        String tax = countryDetails.get(2);
-        MessageCli.COUNTRY_INFO.printMessage(country, continent, tax);
-        validCountry = true; // Exit the loop
       }
     }
+  }
+  
+
+  public void isCountryValid (String country) throws InvalidCountry{
+    
+    if (!countryDetailsMap.containsKey(country)) {
+      throw new InvalidCountry(country);
+    }
+
   }
 
   /** This method is invoked when the user runs the command route. */
