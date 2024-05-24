@@ -14,11 +14,13 @@ public class MapEngine {
   private void loadMap() {
     List<String> countries = Utils.readCountries();
     List<String> adjacencies = Utils.readAdjacencies();
+    System.out.println(countries);
     // add code here to create your data structures
   }
 
   /** this method is invoked when the user run the command info-country. */
   public void showInfoCountry() {
+    MessageCli.INSERT_COUNTRY.printMessage();
     // add code here
   }
 
