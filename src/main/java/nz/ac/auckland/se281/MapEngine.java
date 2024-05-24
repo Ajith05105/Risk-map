@@ -1,29 +1,60 @@
 package nz.ac.auckland.se281;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** This class is the main entry point. */
 public class MapEngine {
 
+  private Map<String, List<String>> countryDetailsMap;
+  private Map<String, List<String>> adjacencyMap;
+
   public MapEngine() {
-    // add other code here if you want
-    loadMap(); // keep this mehtod invocation
+    countryDetailsMap = new HashMap<>();
+    adjacencyMap = new HashMap<>();
+    loadMap(); // keep this method invocation
   }
 
-  /** invoked one time only when constracting the MapEngine class. */
+  /** Invoked one time only when constructing the MapEngine class. */
   private void loadMap() {
     List<String> countries = Utils.readCountries();
+
+    for (String country : countries) {
+      String[] parts = country.split(",");
+      String countryName = parts[0];
+      List<String> countryDetails = Arrays.asList(parts);
+      countryDetailsMap.put(countryName, countryDetails);
+    }
+
     List<String> adjacencies = Utils.readAdjacencies();
-    System.out.println(countries);
-    // add code here to create your data structures
+    for (String adjacency : adjacencies) {
+      String[] parts = adjacency.split(",");
+      String countryName = parts[0];
+      List<String> adjacentCountries =
+          Arrays.asList(parts).subList(1, parts.length); // Exclude the country name itself
+      adjacencyMap.put(countryName, adjacentCountries);
+    }
   }
 
-  /** this method is invoked when the user run the command info-country. */
+  /** This method is invoked when the user runs the command info-country. */
   public void showInfoCountry() {
     MessageCli.INSERT_COUNTRY.printMessage();
-    // add code here
+    String country = Utils.scanner.nextLine();
+    List<String> countryDetails = countryDetailsMap.get(country);
+    if (countryDetails == null) {
+      MessageCli.INVALID_COUNTRY.printMessage(country);
+    } else {
+      // Assuming countryDetails has the format: [countryName, capital, population, ...]
+      String capital = countryDetails.get(1);
+      String population = countryDetails.get(2);
+      MessageCli.COUNTRY_INFO.printMessage(country, capital, population);
+    }
   }
 
-  /** this method is invoked when the user run the command route. */
-  public void showRoute() {}
+  /** This method is invoked when the user runs the command route. */
+  public void showRoute() {
+    // Implementation for route command
+  }
 }
