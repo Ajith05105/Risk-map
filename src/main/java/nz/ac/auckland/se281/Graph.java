@@ -17,6 +17,8 @@ public class Graph {
   }
 
   public void addEdge(String node1, String node2) {
+    addNode(node1);
+    addNode(node2);
     adjNodes.get(node1).add(node2);
     adjNodes.get(node2).add(node1);
   }

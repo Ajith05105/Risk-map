@@ -5,13 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /** This class is the main entry point. */
 public class MapEngine {
 
   private Map<String, List<String>> countryDetailsMap;
   private Map<String, List<String>> adjacencyMap;
-  private String country;
 
   public MapEngine() {
     countryDetailsMap = new HashMap<>();
@@ -44,7 +42,7 @@ public class MapEngine {
   public void showInfoCountry() {
     boolean validCountry = false;
     MessageCli.INSERT_COUNTRY.printMessage();
-    
+
     while (!validCountry) {
       String country = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
       try {
@@ -57,18 +55,23 @@ public class MapEngine {
       }
     }
   }
-  
 
-  public void isCountryValid (String country) throws InvalidCountry{
-    
+  public void isCountryValid(String country) throws InvalidCountry {
+
     if (!countryDetailsMap.containsKey(country)) {
       throw new InvalidCountry(country);
     }
-
   }
 
   /** This method is invoked when the user runs the command route. */
   public void showRoute() {
     // Implementation for route command
+    Graph adjMap = new Graph();
+    for (String country : adjacencyMap.keySet()) {
+      adjMap.addNode(country);
+      for (String adjacentCountry : adjacencyMap.get(country)) {
+        adjMap.addEdge(country, adjacentCountry);
+      }
+    }
   }
 }
