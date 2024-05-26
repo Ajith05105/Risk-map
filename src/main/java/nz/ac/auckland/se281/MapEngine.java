@@ -19,21 +19,29 @@ public class MapEngine {
 
   /** Invoked one time only when constructing the MapEngine class. */
   private void loadMap() {
+    Graph<Country> graph = new Graph<Country>();
     List<String> countries = Utils.readCountries();
 
+    // Creating country nodes in the graph
     for (String c : countries) {
       String[] parts = c.split(",");
       Country country = new Country(parts[0], parts[1], Integer.parseInt(parts[2]));
       countryDetailsMap.put(parts[0], country);
+      graph.addNode(country);
     }
 
+    // Creating edges between countries
     List<String> adjacencies = Utils.readAdjacencies();
     for (String adjacency : adjacencies) {
       String[] parts = adjacency.split(",");
-      String countryName = parts[0];
-      List<String> adjacentCountries =
-          Arrays.asList(parts).subList(1, parts.length); // Exclude the country name itself
-      adjacencyMap.put(countryName, adjacentCountries);
+      String fromCountryName = parts[0];
+      List<String> adjacentCountries = Arrays.asList(parts).subList(1, parts.length);
+
+      Country fromCountry = countryDetailsMap.get(fromCountryName);
+      for (String adjacentCountryName : adjacentCountries) {
+        Country adjacentCountry = countryDetailsMap.get(adjacentCountryName);
+        graph.addEdge(fromCountry, adjacentCountry);
+      }
     }
   }
 
@@ -66,18 +74,6 @@ public class MapEngine {
   /** This method is invoked when the user runs the command route. */
   public void showRoute() {
     // Implementation for route command
-    Graph<Country> graph = new Graph<Country>();
-    for (String countryName : adjacencyMap.keySet()) {
-      Country country = countryDetailsMap.get(countryName);
-      graph.addNode(country);
 
-      for (String adjacentCountryString : adjacencyMap.get(countryName)) {
-        String[] parts = adjacentCountryString.split(",");
-        for (String adjacentCountryName : parts) {
-          Country adjacentCountry = countryDetailsMap.get(adjacentCountryName);
-          graph.addEdge(country, adjacentCountry);
-        }
-      }
-    }
   }
 }
