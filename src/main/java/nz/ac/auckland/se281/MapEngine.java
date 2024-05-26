@@ -8,7 +8,7 @@ import java.util.Map;
 /** This class is the main entry point. */
 public class MapEngine {
 
-  private Map<String, List<String>> countryDetailsMap;
+  private Map<String, Country> countryDetailsMap;
   private Map<String, List<String>> adjacencyMap;
 
   public MapEngine() {
@@ -21,11 +21,10 @@ public class MapEngine {
   private void loadMap() {
     List<String> countries = Utils.readCountries();
 
-    for (String country : countries) {
-      String[] parts = country.split(",");
-      String countryName = parts[0];
-      List<String> countryDetails = Arrays.asList(parts);
-      countryDetailsMap.put(countryName, countryDetails);
+    for (String c : countries) {
+      String[] parts = c.split(",");
+      Country country = new Country(parts[0], parts[1], Integer.parseInt(parts[2]));
+      countryDetailsMap.put(parts[0], country);
     }
 
     List<String> adjacencies = Utils.readAdjacencies();
@@ -44,33 +43,40 @@ public class MapEngine {
     MessageCli.INSERT_COUNTRY.printMessage();
 
     while (!validCountry) {
-      String country = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
+      String countryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
       try {
-        isCountryValid(country);
-        List<String> countryDetails = countryDetailsMap.get(country);
-        MessageCli.COUNTRY_INFO.printMessage(country, countryDetails.get(1), countryDetails.get(2));
+        isCountryValid(countryName);
+        Country country = countryDetailsMap.get(countryName);
+        country.toString();
+        MessageCli.COUNTRY_INFO.printMessage(
+            country.getCountryName(), country.getContinent(), String.valueOf(country.getTaxRate()));
         validCountry = true;
       } catch (InvalidCountry e) {
-        MessageCli.INVALID_COUNTRY.printMessage(country);
+        MessageCli.INVALID_COUNTRY.printMessage(countryName);
       }
     }
   }
 
-  public void isCountryValid(String country) throws InvalidCountry {
-
-    if (!countryDetailsMap.containsKey(country)) {
-      throw new InvalidCountry(country);
+  public void isCountryValid(String countryName) throws InvalidCountry {
+    if (!countryDetailsMap.containsKey(countryName)) {
+      throw new InvalidCountry(countryName);
     }
   }
 
   /** This method is invoked when the user runs the command route. */
   public void showRoute() {
     // Implementation for route command
-    Graph adjMap = new Graph();
-    for (String country : adjacencyMap.keySet()) {
-      adjMap.addNode(country);
-      for (String adjacentCountry : adjacencyMap.get(country)) {
-        adjMap.addEdge(country, adjacentCountry);
+    Graph<Country> graph = new Graph<Country>();
+    for (String countryName : adjacencyMap.keySet()) {
+      Country country = countryDetailsMap.get(countryName);
+      graph.addNode(country);
+
+      for (String adjacentCountryString : adjacencyMap.get(countryName)) {
+        String[] parts = adjacentCountryString.split(",");
+        for (String adjacentCountryName : parts) {
+          Country adjacentCountry = countryDetailsMap.get(adjacentCountryName);
+          graph.addEdge(country, adjacentCountry);
+        }
       }
     }
   }

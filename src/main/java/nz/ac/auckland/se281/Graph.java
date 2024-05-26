@@ -7,32 +7,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-public class Graph {
-  private Map<String, List<String>> adjNodes;
+public class Graph<T> {
+  private Map<T, List<T>> adjNodes;
 
   public Graph() {
     this.adjNodes = new HashMap<>();
   }
 
-  public void addNode(String node) {
+  public void addNode(T node) {
     adjNodes.putIfAbsent(node, new ArrayList<>());
   }
 
-  public void addEdge(String node1, String node2) {
+  public void addEdge(T node1, T node2) {
     addNode(node1);
     addNode(node2);
     adjNodes.get(node1).add(node2);
     adjNodes.get(node2).add(node1);
   }
 
-  public List<String> breathFirstTraversal(String root) {
-    List<String> visited = new ArrayList<>();
-    Queue<String> queue = new LinkedList<>();
+  public List<T> breathFirstTraversal(T root) {
+    List<T> visited = new ArrayList<>();
+    Queue<T> queue = new LinkedList<>();
     queue.add(root);
     visited.add(root);
     while (!queue.isEmpty()) {
-      String node = queue.poll();
-      for (String n : adjNodes.get(node)) {
+      T node = queue.poll();
+      for (T n : adjNodes.get(node)) {
         if (!visited.contains(n)) {
           visited.add(n);
           queue.add(n);
