@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.HashSet;
 
 /** This class is the main entry point. */
 public class MapEngine {
@@ -19,7 +23,7 @@ public class MapEngine {
 
   /** Invoked one time only when constructing the MapEngine class. */
   private void loadMap() {
-    Graph<Country> graph = new Graph<Country>();
+    Graph<Country> graph = new Graph<>();
     List<String> countries = Utils.readCountries();
 
     // Creating country nodes in the graph
@@ -73,7 +77,31 @@ public class MapEngine {
 
   /** This method is invoked when the user runs the command route. */
   public void showRoute() {
-    // Implementation for route command
+    boolean validFromCountry = false;
+    boolean validToCountry = false;
+    String fromCountryName = "";
+    String toCountryName = "";
 
+    MessageCli.INSERT_COUNTRY.printMessage();
+    while (!validFromCountry) {
+      fromCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
+      try {
+        isCountryValid(fromCountryName);
+        validFromCountry = true;
+      } catch (InvalidCountry e) {
+        MessageCli.INVALID_COUNTRY.printMessage(fromCountryName);
+      }
+    }
+
+    MessageCli.INSERT_COUNTRY.printMessage();
+    while (!validToCountry) {
+      toCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
+      try {
+        isCountryValid(toCountryName);
+        validToCountry = true;
+      } catch (InvalidCountry e) {
+        MessageCli.INVALID_COUNTRY.printMessage(toCountryName);
+      }
+    }
   }
 }
