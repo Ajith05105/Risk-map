@@ -1,29 +1,20 @@
 package nz.ac.auckland.se281;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
-/** This class is the main entry point. */
 public class MapEngine {
 
   private Map<String, Country> countryDetailsMap;
-  private Map<String, List<String>> adjacencyMap;
+  private Graph<Country> graph;
 
   public MapEngine() {
     countryDetailsMap = new HashMap<>();
-    adjacencyMap = new HashMap<>();
+    graph = new Graph<>();
     loadMap(); // keep this method invocation
   }
 
   /** Invoked one time only when constructing the MapEngine class. */
   private void loadMap() {
-    Graph<Country> graph = new Graph<>();
     List<String> countries = Utils.readCountries();
 
     // Creating country nodes in the graph
@@ -82,7 +73,7 @@ public class MapEngine {
     String fromCountryName = "";
     String toCountryName = "";
 
-    MessageCli.INSERT_COUNTRY.printMessage();
+    MessageCli.INSERT_SOURCE.printMessage();
     while (!validFromCountry) {
       fromCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
       try {
@@ -93,7 +84,7 @@ public class MapEngine {
       }
     }
 
-    MessageCli.INSERT_COUNTRY.printMessage();
+    MessageCli.INSERT_DESTINATION.printMessage();
     while (!validToCountry) {
       toCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
       try {
@@ -103,5 +94,51 @@ public class MapEngine {
         MessageCli.INVALID_COUNTRY.printMessage(toCountryName);
       }
     }
+
+    List<String> route = findShortestRoute(fromCountryName, toCountryName);
+    if (route != null) {
+      MessageCli.ROUTE_INFO.printMessage(String.valueOf(route));
+    } else {
+      MessageCli.NO_CROSSBORDER_TRAVEL.printMessage();
+    }
+  }
+
+  private List<String> findShortestRoute(String fromCountryName, String toCountryName) {
+    Country fromCountry = countryDetailsMap.get(fromCountryName);
+    Country toCountry = countryDetailsMap.get(toCountryName);
+
+    // BFS to find the shortest path
+    Queue<List<Country>> queue = new LinkedList<>();
+    Set<Country> visited = new HashSet<>();
+
+    queue.add(Arrays.asList(fromCountry));
+    visited.add(fromCountry);
+
+    while (!queue.isEmpty()) {
+      List<Country> path = queue.poll();
+      Country currentCountry = path.get(path.size() - 1);
+
+      if (currentCountry.equals(toCountry)) {
+        return convertPathToStringList(path);
+      }
+
+      for (Country neighbor : graph.getNeighbors(currentCountry)) {
+        if (!visited.contains(neighbor)) {
+          visited.add(neighbor);
+          List<Country> newPath = new LinkedList<>(path);
+          newPath.add(neighbor);
+          queue.add(newPath);
+        }
+      }
+    }
+    return null; // No route found
+  }
+
+  private List<String> convertPathToStringList(List<Country> path) {
+    List<String> stringPath = new LinkedList<>();
+    for (Country country : path) {
+      stringPath.add(country.getCountryName());
+    }
+    return stringPath;
   }
 }

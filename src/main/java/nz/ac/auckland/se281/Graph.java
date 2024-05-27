@@ -2,10 +2,8 @@ package nz.ac.auckland.se281;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 public class Graph<T> {
   private Map<T, List<T>> adjNodes;
@@ -25,20 +23,7 @@ public class Graph<T> {
     adjNodes.get(node2).add(node1);
   }
 
-  public List<T> breathFirstTraversal(T root) {
-    List<T> visited = new ArrayList<>();
-    Queue<T> queue = new LinkedList<>();
-    queue.add(root);
-    visited.add(root);
-    while (!queue.isEmpty()) {
-      T node = queue.poll();
-      for (T n : adjNodes.get(node)) {
-        if (!visited.contains(n)) {
-          visited.add(n);
-          queue.add(n);
-        }
-      }
-    }
-    return visited;
+  public List<T> getNeighbors(T node) {
+    return adjNodes.getOrDefault(node, new ArrayList<>());
   }
 }
