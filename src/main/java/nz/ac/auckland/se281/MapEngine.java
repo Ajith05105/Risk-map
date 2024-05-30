@@ -1,113 +1,129 @@
 package nz.ac.auckland.se281;
-
 import java.util.*;
 
 public class MapEngine {
-  private Map<String, Country> countryDetailsMap;
-  private Graph<Country> graph;
-  List<String> routeNames;
+    private Map<String, Country> countryDetailsMap;
+    private Map<Country, List<Country>> adjacenciesMap; 
+    private Graph<Country> graph;
+    List<String> routeNames;
 
-  public MapEngine() {
-    countryDetailsMap = new HashMap<>();
-    graph = new Graph<>();
-    loadMap(); // keep this method invocation
-  }
-
-  private void loadMap() {
-    List<String> countries = Utils.readCountries();
-    for (String c : countries) {
-      String[] parts = c.split(",");
-      Country country = new Country(parts[0], parts[1], Integer.parseInt(parts[2]));
-      countryDetailsMap.put(parts[0], country);
-      graph.addNode(country);
+    public MapEngine() {
+        countryDetailsMap = new LinkedHashMap<>();
+        adjacenciesMap = new LinkedHashMap<>();
+        graph = new Graph<>();
+        loadMap(); // keep this method invocation
     }
 
-    List<String> adjacencies = Utils.readAdjacencies();
-    for (String adjacency : adjacencies) {
-      String[] parts = adjacency.split(",");
-      String fromCountryName = parts[0];
-      List<String> adjacentCountries = Arrays.asList(parts).subList(1, parts.length);
-      Country fromCountry = countryDetailsMap.get(fromCountryName);
-      for (String adjacentCountryName : adjacentCountries) {
-        Country adjacentCountry = countryDetailsMap.get(adjacentCountryName);
-        graph.addEdge(fromCountry, adjacentCountry);
-      }
-    }
-  }
+    private void loadMap() {
+        List<String> countries = Utils.readCountries();
+        for (String c : countries) {
+            String[] parts = c.split(",");
+            Country country = new Country(parts[0], parts[1], Integer.parseInt(parts[2]));
+            countryDetailsMap.put(parts[0], country);
+            adjacenciesMap.put(country, new ArrayList<>()); // Initialize the adjacency list for each country
+        }
 
-  public void showInfoCountry() {
-    boolean validCountry = false;
-    MessageCli.INSERT_COUNTRY.printMessage();
-
-    while (!validCountry) {
-      String countryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
-      try {
-        isCountryValid(countryName);
-        Country country = countryDetailsMap.get(countryName);
-        MessageCli.COUNTRY_INFO.printMessage(
-            country.getCountryName(), country.getContinent(), String.valueOf(country.getTaxRate()));
-        validCountry = true;
-      } catch (InvalidCountry e) {
-        MessageCli.INVALID_COUNTRY.printMessage(countryName);
-      }
-    }
-  }
-
-  public void isCountryValid(String countryName) throws InvalidCountry {
-    if (!countryDetailsMap.containsKey(countryName)) {
-      throw new InvalidCountry(countryName);
-    }
-  }
-
-  public void showRoute() {
-    boolean validFromCountry = false;
-    boolean validToCountry = false;
-    String fromCountryName = "";
-    String toCountryName = "";
-
-    MessageCli.INSERT_SOURCE.printMessage();
-    while (!validFromCountry) {
-      fromCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
-      try {
-        isCountryValid(fromCountryName);
-        validFromCountry = true;
-      } catch (InvalidCountry e) {
-        MessageCli.INVALID_COUNTRY.printMessage(fromCountryName);
-      }
+        List<String> adjacencies = Utils.readAdjacencies();
+        for (String adjacency : adjacencies) {
+            String[] parts = adjacency.split(",");
+            String fromCountryName = parts[0];
+            List<Country> adjacentCountries = new ArrayList<>(); // List to store adjacent countries as Country objects
+            for (int i = 1; i < parts.length; i++) {
+                Country adjacentCountry = countryDetailsMap.get(parts[i]);
+                if (adjacentCountry != null) {
+                    adjacentCountries.add(adjacentCountry);
+                } else {
+                    System.err.println("Warning: Country " + parts[i] + " not found in the country map.");
+                }
+            }
+            Country fromCountry = countryDetailsMap.get(fromCountryName);
+            if (fromCountry != null) {
+                adjacenciesMap.put(fromCountry, adjacentCountries);
+            } else {
+                System.err.println("Warning: Country " + fromCountryName + " not found in the country map.");
+            }
+        }
+        graph.setMap(adjacenciesMap);
     }
 
-    MessageCli.INSERT_DESTINATION.printMessage();
-    while (!validToCountry) {
-      toCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
-      try {
-        isCountryValid(toCountryName);
-        validToCountry = true;
-      } catch (InvalidCountry e) {
-        MessageCli.INVALID_COUNTRY.printMessage(toCountryName);
-      }
+
+    public void showInfoCountry() {
+        boolean validCountry = false;
+        MessageCli.INSERT_COUNTRY.printMessage();
+
+        while (!validCountry) {
+            String countryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
+            try {
+                isCountryValid(countryName);
+                Country country = countryDetailsMap.get(countryName);
+                MessageCli.COUNTRY_INFO.printMessage(
+                        country.getCountryName(), country.getContinent(), String.valueOf(country.getTaxRate()));
+                validCountry = true;
+            } catch (InvalidCountry e) {
+                MessageCli.INVALID_COUNTRY.printMessage(countryName);
+            }
+        }
     }
 
-    List<String> route = findShortestRoute(fromCountryName, toCountryName);
-    if (route != null && route.size() > 1) {
-      MessageCli.ROUTE_INFO.printMessage(String.valueOf(route));
-    } else {
-      MessageCli.NO_CROSSBORDER_TRAVEL.printMessage();
-    }
-  }
-
-  public List<String> findShortestRoute(String fromCountryName, String toCountryName) {
-    Country fromCountry = countryDetailsMap.get(fromCountryName);
-    Country toCountry = countryDetailsMap.get(toCountryName);
-
-    List<Country> route = graph.findShortestPath(fromCountry, toCountry);
-    if (route == null) {
-      return null;
+    public void isCountryValid(String countryName) throws InvalidCountry {
+        if (!countryDetailsMap.containsKey(countryName)) {
+            throw new InvalidCountry(countryName);
+        }
     }
 
-    List<String> routeNames = new ArrayList<>();
-    for (Country c : route) {
-      routeNames.add(c.getCountryName());
+    public void showRoute() {
+        boolean validFromCountry = false;
+        boolean validToCountry = false;
+        String fromCountryName = "";
+        String toCountryName = "";
+
+        MessageCli.INSERT_SOURCE.printMessage();
+        while (!validFromCountry) {
+            fromCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
+            try {
+                isCountryValid(fromCountryName);
+                validFromCountry = true;
+            } catch (InvalidCountry e) {
+                MessageCli.INVALID_COUNTRY.printMessage(fromCountryName);
+            }
+        }
+
+        MessageCli.INSERT_DESTINATION.printMessage();
+        while (!validToCountry) {
+            toCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
+            try {
+                isCountryValid(toCountryName);
+                validToCountry = true;
+            } catch (InvalidCountry e) {
+                MessageCli.INVALID_COUNTRY.printMessage(toCountryName);
+            }
+        }
+
+        List<String> route = findShortestRoute(fromCountryName, toCountryName);
+        if (route != null && route.size() > 1) {
+            MessageCli.ROUTE_INFO.printMessage(String.valueOf(route));
+        } else {
+            MessageCli.NO_CROSSBORDER_TRAVEL.printMessage();
+        }
     }
-    return routeNames;
-  }
+
+    public List<String> findShortestRoute(String fromCountryName, String toCountryName) {
+        Country fromCountry = countryDetailsMap.get(fromCountryName);
+        Country toCountry = countryDetailsMap.get(toCountryName);
+
+        List<Country> route = graph.findShortestPath(fromCountry, toCountry);
+        if (route == null) {
+            return null;
+        }
+
+        List<String> routeNames = new ArrayList<>();
+        for (Country c : route) {
+            routeNames.add(c.getCountryName());
+        }
+        return routeNames;
+    }
+
+    public void printGraph() {
+        System.out.println(graph.printGraph());
+    }
 }
