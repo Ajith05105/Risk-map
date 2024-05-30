@@ -5,7 +5,9 @@ public class MapEngine {
     private Map<String, Country> countryDetailsMap;
     private Map<Country, List<Country>> adjacenciesMap; 
     private Graph<Country> graph;
-    List<String> routeNames;
+    List<String> routeNames;  
+    List<String> continents;
+
 
     public MapEngine() {
         countryDetailsMap = new LinkedHashMap<>();
@@ -120,10 +122,23 @@ public class MapEngine {
         for (Country c : route) {
             routeNames.add(c.getCountryName());
         }
+
+        continents = findContinents(routeNames);
+        MessageCli.CONTINENT_INFO.printMessage(String.valueOf(continents));
         return routeNames;
     }
 
-    public void printGraph() {
-        System.out.println(graph.printGraph());
+    public List<String> findContinents (List<String> routeNames){
+        List<String> continents = new ArrayList<>();
+        for (String countryName : routeNames) {
+            Country country = countryDetailsMap.get(countryName);
+            if (!continents.contains(country.getContinent())) {
+                continents.add(country.getContinent());
+            }
+        }
+
+        return continents;
     }
+
+   
 }

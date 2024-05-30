@@ -45,16 +45,4 @@ public class Graph<T> {
     }
     return null;
   }
-
-  public String printGraph() {
-    StringBuilder sb = new StringBuilder();
-    for (T node : adjNodes.keySet()) {
-      sb.append(node.toString()).append(": ");
-      for (T neighbor : adjNodes.get(node)) {
-        sb.append(neighbor.toString()).append(" ");
-      }
-      sb.append("\n");
-    }
-    return sb.toString();
-  }
 }
