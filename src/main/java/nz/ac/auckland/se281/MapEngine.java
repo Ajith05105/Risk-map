@@ -149,10 +149,17 @@ public class MapEngine {
 
   public int calculateTaxes(List<String> routeNames) {
     int totalTaxes = 0;
-    for (String countryName : routeNames) {
-      Country country = countryDetailsMap.get(countryName);
-      totalTaxes += country.getTaxRate();
+
+   
+
+    // Loop through the list, skipping the first and last elements
+    for (int i = 1; i < routeNames.size() ; i++) {
+        String countryName = routeNames.get(i);
+        Country country = countryDetailsMap.get(countryName);
+        totalTaxes += country.getTaxRate();
     }
+
     return totalTaxes;
-  }
+}
+
 }
