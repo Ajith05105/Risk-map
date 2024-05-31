@@ -3,9 +3,11 @@ package nz.ac.auckland.se281;
 import java.util.*;
 
 public class MapEngine {
+  // Maps for storing country details and adjacencies
   private Map<String, Country> countryDetailsMap;
   private Map<Country, List<Country>> adjacenciesMap;
   private Graph<Country> graph;
+  // Variables for route names, continents, and taxes
   List<String> routeNames;
   List<String> continents;
   int taxes;
@@ -14,10 +16,11 @@ public class MapEngine {
     countryDetailsMap = new LinkedHashMap<>();
     adjacenciesMap = new LinkedHashMap<>();
     graph = new Graph<>();
-    loadMap(); // keep this method invocation
+    loadMap(); // Load country and adjacency data
   }
 
   private void loadMap() {
+    // Read country data from external source
     List<String> countries = Utils.readCountries();
     for (String c : countries) {
       String[] parts = c.split(",");
@@ -27,6 +30,7 @@ public class MapEngine {
           country, new ArrayList<>()); // Initialize the adjacency list for each country
     }
 
+    // Read adjacency data from external source
     List<String> adjacencies = Utils.readAdjacencies();
     for (String adjacency : adjacencies) {
       String[] parts = adjacency.split(",");
@@ -37,21 +41,18 @@ public class MapEngine {
         Country adjacentCountry = countryDetailsMap.get(parts[i]);
         if (adjacentCountry != null) {
           adjacentCountries.add(adjacentCountry);
-        } else {
-          System.err.println("Warning: Country " + parts[i] + " not found in the country map.");
         }
       }
       Country fromCountry = countryDetailsMap.get(fromCountryName);
       if (fromCountry != null) {
         adjacenciesMap.put(fromCountry, adjacentCountries);
-      } else {
-        System.err.println(
-            "Warning: Country " + fromCountryName + " not found in the country map.");
       }
     }
+    // Set the map in the graph
     graph.setMap(adjacenciesMap);
   }
 
+  /** This method shows the information of a country. */
   public void showInfoCountry() {
     boolean validCountry = false;
     MessageCli.INSERT_COUNTRY.printMessage();
@@ -59,8 +60,9 @@ public class MapEngine {
     while (!validCountry) {
       String countryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
       try {
-        isCountryValid(countryName);
+        isCountryValid(countryName); // Check if the country is valid
         Country country = countryDetailsMap.get(countryName);
+        // Print country information
         MessageCli.COUNTRY_INFO.printMessage(
             country.getCountryName(), country.getContinent(), String.valueOf(country.getTaxRate()));
         validCountry = true;
@@ -70,11 +72,19 @@ public class MapEngine {
     }
   }
 
+  /**
+   * This method checks if the country is valid.
+   *
+   * @param countryName the name of the country
+   * @throws InvalidCountry if the country is not valid
+   */
   public void isCountryValid(String countryName) throws InvalidCountry {
     if (!countryDetailsMap.containsKey(countryName)) {
       throw new InvalidCountry(countryName);
     }
   }
+
+  // can you do javadoc for this method?
 
   public void showRoute() {
     boolean validFromCountry = false;
@@ -86,7 +96,7 @@ public class MapEngine {
     while (!validFromCountry) {
       fromCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
       try {
-        isCountryValid(fromCountryName);
+        isCountryValid(fromCountryName); // Check if the source country is valid
         validFromCountry = true;
       } catch (InvalidCountry e) {
         MessageCli.INVALID_COUNTRY.printMessage(fromCountryName);
@@ -97,13 +107,14 @@ public class MapEngine {
     while (!validToCountry) {
       toCountryName = Utils.capitalizeFirstLetterOfEachWord(Utils.scanner.nextLine());
       try {
-        isCountryValid(toCountryName);
+        isCountryValid(toCountryName); // Check if the destination country is valid
         validToCountry = true;
       } catch (InvalidCountry e) {
         MessageCli.INVALID_COUNTRY.printMessage(toCountryName);
       }
     }
 
+    // Find and show the shortest route
     List<String> route = findShortestRoute(fromCountryName, toCountryName);
     if (route != null && route.size() > 1) {
       MessageCli.ROUTE_INFO.printMessage(String.valueOf(route));
@@ -116,17 +127,20 @@ public class MapEngine {
     Country fromCountry = countryDetailsMap.get(fromCountryName);
     Country toCountry = countryDetailsMap.get(toCountryName);
 
+    // Find the shortest path using the graph
     List<Country> route = graph.findShortestPath(fromCountry, toCountry);
     if (route == null) {
       return null;
     }
 
+    // Convert the route to a list of country names
     List<String> routeNames = new ArrayList<>();
     for (Country c : route) {
       routeNames.add(c.getCountryName());
     }
 
     if (route.size() > 1) {
+      // Find the continents and calculate taxes for the route
       continents = findContinents(routeNames);
       taxes = calculateTaxes(routeNames);
       MessageCli.TAX_INFO.printMessage(String.valueOf(taxes));
@@ -135,6 +149,7 @@ public class MapEngine {
     return routeNames;
   }
 
+  // Method to find the continents in the route
   public List<String> findContinents(List<String> routeNames) {
     List<String> continents = new ArrayList<>();
     for (String countryName : routeNames) {
@@ -143,23 +158,20 @@ public class MapEngine {
         continents.add(country.getContinent());
       }
     }
-
     return continents;
   }
 
+  // Method to calculate the total taxes for the route
   public int calculateTaxes(List<String> routeNames) {
     int totalTaxes = 0;
 
-   
-
     // Loop through the list, skipping the first and last elements
-    for (int i = 1; i < routeNames.size() ; i++) {
-        String countryName = routeNames.get(i);
-        Country country = countryDetailsMap.get(countryName);
-        totalTaxes += country.getTaxRate();
+    for (int i = 1; i < routeNames.size(); i++) {
+      String countryName = routeNames.get(i);
+      Country country = countryDetailsMap.get(countryName);
+      totalTaxes += country.getTaxRate();
     }
 
     return totalTaxes;
-}
-
+  }
 }
