@@ -3,14 +3,11 @@ package nz.ac.auckland.se281;
 import java.util.*;
 
 public class MapEngine {
-  // Maps for storing country details and adjacencies
   private Map<String, Country> countryDetailsMap;
   private Map<Country, List<Country>> adjacenciesMap;
   private Graph<Country> graph;
-  // Variables for route names, continents, and taxes
-  List<String> routeNames;
-  List<String> continents;
-  int taxes;
+  private List<String> continents;
+  private int taxes;
 
   public MapEngine() {
     countryDetailsMap = new LinkedHashMap<>();
@@ -52,7 +49,9 @@ public class MapEngine {
     graph.setMap(adjacenciesMap);
   }
 
-  /** This method shows the information of a country. */
+  /*
+   * This method shows the information of a country.
+   */
   public void showInfoCountry() {
     boolean validCountry = false;
     MessageCli.INSERT_COUNTRY.printMessage();
@@ -84,8 +83,7 @@ public class MapEngine {
     }
   }
 
-  // can you do javadoc for this method?
-
+  /** This method shows the information of a country. */
   public void showRoute() {
     boolean validFromCountry = false;
     boolean validToCountry = false;
@@ -123,6 +121,13 @@ public class MapEngine {
     }
   }
 
+  /**
+   * This method finds the shortest route between two countries.
+   *
+   * @param fromCountryName the name of the source country
+   * @param toCountryName the name of the destination country
+   * @return the list of country names in the shortest route
+   */
   public List<String> findShortestRoute(String fromCountryName, String toCountryName) {
     Country fromCountry = countryDetailsMap.get(fromCountryName);
     Country toCountry = countryDetailsMap.get(toCountryName);
@@ -149,7 +154,12 @@ public class MapEngine {
     return routeNames;
   }
 
-  // Method to find the continents in the route
+  /**
+   * This method finds the continents visited in the route.
+   *
+   * @param routeNames the list of country names in the route
+   * @return the list of continents visited
+   */
   public List<String> findContinents(List<String> routeNames) {
     List<String> continents = new ArrayList<>();
     for (String countryName : routeNames) {
@@ -161,7 +171,12 @@ public class MapEngine {
     return continents;
   }
 
-  // Method to calculate the total taxes for the route
+  /**
+   * This method calculates the total taxes for the route.
+   *
+   * @param routeNames the list of country names in the route
+   * @return the total taxes for the route
+   */
   public int calculateTaxes(List<String> routeNames) {
     int totalTaxes = 0;
 

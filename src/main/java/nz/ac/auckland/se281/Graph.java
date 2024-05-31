@@ -11,12 +11,17 @@ public class Graph<T> {
     this.adjNodes = new LinkedHashMap<>(); // Use LinkedHashMap to preserve insertion order
   }
 
-  // Method to set the adjacency map
   public void setMap(Map<T, List<T>> adjNodes) {
     this.adjNodes = adjNodes;
   }
 
-  // Method to find the shortest path between two nodes using BFS
+  /**
+   * This method finds the shortest path between two nodes in the graph using BFS.
+   *
+   * @param start the start node
+   * @param end the end node
+   * @return the shortest path as a list of nodes, or null if no path is found
+   */
   public List<T> findShortestPath(T start, T end) {
     // Check if start or end nodes are not in the adjacency map
     if (!adjNodes.containsKey(start) || !adjNodes.containsKey(end)) {
@@ -32,25 +37,18 @@ public class Graph<T> {
 
     // BFS loop to explore the graph
     while (!queue.isEmpty()) {
-      // Dequeue the first path from the queue
       List<T> path = queue.poll();
-      // Get the last node in the current path
       T current = path.get(path.size() - 1);
 
-      // If the last node is the end node, return the path
       if (current.equals(end)) {
         return path;
       }
 
-      // Explore the neighbors of the current node
       for (T neighbor : adjNodes.get(current)) {
         if (!visited.contains(neighbor)) {
-          // Mark the neighbor as visited
           visited.add(neighbor);
-          // Create a new path by extending the current path with the neighbor
           List<T> newPath = new ArrayList<>(path);
           newPath.add(neighbor);
-          // Enqueue the new path for further exploration
           queue.add(newPath);
         }
       }
